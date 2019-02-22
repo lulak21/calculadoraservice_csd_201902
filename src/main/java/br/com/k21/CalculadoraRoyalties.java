@@ -7,35 +7,38 @@ import br.com.k21.modelo.Venda;
 
 public class CalculadoraRoyalties {
 
-	private VendaRepository _repository;
-	public CalculadoraRoyalties(VendaRepository repository) {
-		
-		_repository = repository;
-		// TODO Auto-generated constructor stub
-	}
+	VendaRepository vendaRepository = new VendaRepository();
 	
 	public CalculadoraRoyalties() {
-		_repository = new VendaRepository();
+		this.vendaRepository = new VendaRepository();
+	}
+	
+	public CalculadoraRoyalties(VendaRepository marionete) {
+		// TODO Auto-generated constructor stub
+		this.vendaRepository = marionete;
 	}
 
 	public double calcularRoyalties(int mes, int ano) {
-		CalculadoraComissao calculadoraComissao = new CalculadoraComissao();
-		List<Venda> vendas = _repository.obterVendasPorMesEAno(ano,  mes);
 		
-		//Comissao por vendas
-		double valorComissao = 0;
-		double valorFaturamento = 0;
+		List<Venda> vendas = vendaRepository.obterVendasPorMesEAno(ano, mes);
 		
-		for (int i = 0; i < vendas.size(); i++) {
-			double valorVenda = vendas.get(i).getValor();
+		double vendasTotal    = 0;
+		double comissoesTotal = 0;
+		double faturamento    = 0;
+		for (Venda venda : vendas) {
+			double comissao = CalculadoraComissao.calcular(venda.getValor());
+			vendasTotal += venda.getValor();
+			comissoesTotal += comissao;
 			
-			valorComissao += calculadoraComissao.calcular(valorVenda);
-			valorFaturamento += valorVenda;
+			
 		}
-				
-		double valorRoyalties = (valorFaturamento - valorComissao) * 0.2;
+		faturamento = vendasTotal - comissoesTotal;
+		double royalties  = truncar(faturamento * 0.2);
+		return royalties;
 		
-		return Math.floor(valorRoyalties * 100)/100;
-		
+	}
+
+	private static double truncar(double venda) {
+		return Math.floor(venda  * 100.0) / 100.0;
 	}
 }

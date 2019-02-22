@@ -1,4 +1,4 @@
-package br.com.k21.calculadora_service;
+package br.com.k21;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,32 +9,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import br.com.k21.CalculadoraRoyalties;
 import br.com.k21.dao.VendaRepository;
 import br.com.k21.modelo.Venda;
 
 public class TestCalculadoraRoyalties {
-	
-	VendaRepository marionete;
-	List<Venda> listaVendas;
-	
+
+	private VendaRepository marionete;
+
 	@Before
-	public void criarMarionete()
+	public void marioneteFactory()
 	{
-		marionete = Mockito.mock(VendaRepository.class);	
-		listaVendas = new ArrayList<Venda>();
-	}
-
-	@Test
-	public void teste_mes_1_ano_2019_retorna_10000() {
-
-		int mes = 1;
-		int ano = 2019;
-		int result = 1900;
-
-		double royaltiesCalculado = new CalculadoraRoyalties().calcularRoyalties(mes, ano);
-
-		assertEquals(result, royaltiesCalculado, 0);
+		marionete = Mockito.mock(VendaRepository.class);
 	}
 	
 	@Test
@@ -42,46 +27,56 @@ public class TestCalculadoraRoyalties {
 
 		int mes = 7;
 		int ano = 2018;
-		int result = 0;
+		int royaltiesEsperado = 0;
 
-		double royaltiesCalculado = new CalculadoraRoyalties(marionete).calcularRoyalties(mes, ano);
 
-		assertEquals(result, royaltiesCalculado, 0);
+		CalculadoraRoyalties calculadora = new CalculadoraRoyalties(marionete);
+
+		double royaltiesCalculado = calculadora.calcularRoyalties(mes, ano);
+
+		assertEquals(royaltiesEsperado, royaltiesCalculado, 0);
 	}
+
 	@Test
-	public void teste_mes_com_vendas_retorna_2820() {
-
-		//Arrange
-		int mes = 2;
-		int ano = 2019;
-		int result = 2820;
-
-		
-		listaVendas.add(new Venda(1, 1, mes, ano, 15000));
-		Mockito.when(marionete.obterVendasPorMesEAno(ano, mes)).thenReturn(listaVendas);
-		
-		//Act
-		double royaltiesCalculado = new CalculadoraRoyalties(marionete).calcularRoyalties(mes, ano);
-
-		//Assert
-		assertEquals(result, royaltiesCalculado,0);
-	}
-	
-	@Test
-	public void teste_mes_com_vendas_retorna_29_56() {
+	public void teste_mes_com_uma_venda_de_dez_mil_retorna_1900() {
 
 		int mes = 1;
 		int ano = 2019;
-		double result = 29.56;
-		
-		listaVendas.add(new Venda(1, 1, mes, ano, 55.59));
-		listaVendas.add(new Venda(2, 1, mes, ano, 100));
-		
-		Mockito.when(marionete.obterVendasPorMesEAno(ano, mes)).thenReturn(listaVendas);
-		
-		//Act
-		double royaltiesCalculado = new CalculadoraRoyalties(marionete).calcularRoyalties(mes, ano);
+		int royaltiesEsperado = 1900;
 
-		assertEquals(result, royaltiesCalculado,0);
+
+		// conectar cabos
+		List<Venda> vendas = new ArrayList<Venda>();
+		Venda venda = new Venda(1, 1, mes, ano, 10000);
+		vendas.add(venda);
+		Mockito.when(marionete.obterVendasPorMesEAno(ano, mes)).thenReturn(vendas);
+
+		CalculadoraRoyalties calculadora = new CalculadoraRoyalties(marionete);
+
+		double royaltiesCalculado = calculadora.calcularRoyalties(mes, ano);
+
+		assertEquals(royaltiesEsperado, royaltiesCalculado, 0);
 	}
+
+	@Test
+	public void teste_mes_com_uma_venda_de_dez_mil_retorna_2360_56() {
+
+		int mes = 2;
+		int ano = 2019;
+		double royaltiesEsperado = 2360.56;
+
+		
+		// conectar cabos
+		List<Venda> vendas = new ArrayList<Venda>();
+		vendas.add(new Venda(1, 1, mes, ano, 55.59));
+		vendas.add(new Venda(2, 1, mes, ano, 12500));
+		Mockito.when(marionete.obterVendasPorMesEAno(ano, mes)).thenReturn(vendas);
+
+		CalculadoraRoyalties calculadora = new CalculadoraRoyalties(marionete);
+
+		double royaltiesCalculado = calculadora.calcularRoyalties(mes, ano);
+
+		assertEquals(royaltiesEsperado, royaltiesCalculado, 0);
+	}
+
 }
